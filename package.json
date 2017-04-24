@@ -1,6 +1,6 @@
 {
   "name": "mysql-to-csv",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Exports unlimited large MySQL queried data to zipped CSV file via nodejs streams.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andre Schaf",
-  "url" : "https://github.com/polyamid23/mysql-to-csv",
+  "url": "https://github.com/polyamid23/mysql-to-csv",
   "license": "MIT",
   "dependencies": {
     "archiver": "^1.3.0",
