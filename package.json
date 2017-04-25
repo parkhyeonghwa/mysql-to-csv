@@ -1,6 +1,6 @@
 {
   "name": "mysql-to-csv",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Exports unlimited large MySQL queried data to zipped CSV file via nodejs streams.",
   "main": "index.js",
   "scripts": {
