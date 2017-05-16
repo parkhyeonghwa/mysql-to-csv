@@ -1,6 +1,7 @@
 // Check if all params are there
 const fs = require('fs');
 
+const optionsConf = require('./conf/options.conf');
 const commander = require('commander');
 const mysql = require('mysql');
 const through = require('through');
@@ -9,6 +10,22 @@ const archiver = require('archiver');
 const asciiProgress = require('ascii-progress');
 
 module.exports = {
+	evaluateExecutionCommand: function(options) {
+		let executionCommand = 'node index.js ';
+		let optionSymbol = '';
+		let optionDefault = '';
+
+		Object.keys(options).forEach((key) => {
+			optionSymbol = optionsConf[key].arg;
+			optionDefault = optionsConf[key].default;
+
+			if (options[key] !== optionDefault) {
+				executionCommand += `${optionSymbol} "${options[key]}" `;
+			}
+		});
+
+		console.info(`---\nExecution command: \n${executionCommand}\n---`);
+	},
 	init: function(options) {
 		this.connection = null;
 
@@ -31,7 +48,7 @@ module.exports = {
 					return;
 			}
 
-			this.query = fs.readFileSync(options.query, 'utf8').split(';')[0];
+			this.query = fs.readFileSync(options.query, 'utf8');
 		}
 		else if (options.query === '') {
 			this.query = `SELECT ${this.columns !== '*' ? '??' : '*'} FROM ?? ${options.limit > 0 ? 'LIMIT ' + options.limit : ''}`;
@@ -43,15 +60,19 @@ module.exports = {
 			this.replaceArgs.push(options.table);
 		}
 		else {
-			this.query = options.query.split(';')[0];
+			this.query = options.query;
 		}
+
+		options.query = this.query;
+		this.evaluateExecutionCommand(options);
 
 		let args = {
 			host: this.host,
 			port: this.port,
 			user: this.user,
 			password: this.password,
-			database: this.database
+			database: this.database,
+			multipleStatements: true
 		};
 
 		this.connection = mysql.createConnection(args);
@@ -67,6 +88,11 @@ module.exports = {
 
 			this.export();
 		}.bind(this));
+
+		this.connection.on('error', function(err) {
+			this.terminate(err);
+			return;
+  	}.bind(this));
 	},
 	export: function() {
 		let interval;
@@ -101,7 +127,14 @@ module.exports = {
 			.pipe(through(function (data) {
 				progress += 1;
 
-				return csvwriter(data, { quoteMode: 2, header: firstLine }, function(err, csv) {
+				// Replace null values
+				Object.keys(data).forEach((key) => {
+					if (data[key] === null) {
+						data[key] = 'NULL';
+					}
+				});
+
+				return csvwriter(data, { quoteMode: 1, header: firstLine, doubleQuote: false }, function(err, csv) {
 					firstLine = false;
 					this.queue(csv);
 				}.bind(this));

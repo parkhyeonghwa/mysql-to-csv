@@ -1,27 +1,17 @@
 const commander = require('commander');
+const prompt = require('prompt');
+
+const schema = require('./conf/prompt.conf');
+const optionsConf = require('./conf/options.conf');
 const exporter = require('./exporter');
 
-commander
-  .version('0.1.0')
-  .option('-h, --host [string]', 'Choose MySQL host')
-  .option('-P, --port [integer]', 'Choose MySQL port')
-  .option('-d, --database [string]', 'Choose MySQL database')
-  .option('-u, --user [string]', 'Choose MySQL user')
-  .option('-p, --password [string]', 'Choose MySQL password')
-  .option('-t, --table [string]', 'Choose table')
-  .option('-o, --outputFilename [string]', 'Choose output filename')
-  .option('-T, --outputType [string]', 'Choose output type', (t) => {
-		return (['csv', 'zip', 'term'].indexOf(t) !== -1) ? t : 'term';
-	})
-  .option('-e, --encrypt', 'Choose if zip file should be encrypted')
-  .option('-c, --columns [string]', 'Choose columns', (c) => { return c.split(' '); })
-  .option('-l, --limit [integer]', 'Set export limit')
-  .option('-s, --silent', 'Hide progressbar')
-	.option('-q, --query [string]', 'SQL query or .sql file')
-	.parse(process.argv);
+commander.version('0.1.0');
 
-const prompt = require('prompt');
-const schema = require('./conf/prompt.conf');
+Object.keys(optionsConf).forEach((key) => {
+  commander.option(optionsConf[key].arg + ' --' + key + (optionsConf[key].type ? ' [' + optionsConf[key].type + ']' : ''), optionsConf[key].description, optionsConf[key].callback || function(x) { return x; });
+});
+
+commander.parse(process.argv);
 
 prompt.override = commander;
 prompt.start();

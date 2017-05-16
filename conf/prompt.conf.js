@@ -67,7 +67,7 @@ module.exports = [
 	},
 	{
 		ask: () => {
-			return commander.rawArgs.indexOf('-t') !== -1 || prompt.history('query').value === '';
+			return commander.rawArgs.indexOf('-q') === -1 && (commander.rawArgs.indexOf('-t') !== -1 || prompt.history('query').value === '');
 		},
 		name: 'columns',
 		description: 'DB columns (seperator: ",")',
@@ -82,7 +82,7 @@ module.exports = [
 	},
 	{
 		ask: () => {
-			return !prompt.history('query') || prompt.history('query').value === '';
+			return commander.rawArgs.indexOf('-q') === -1 && (!prompt.history('query') || prompt.history('query').value === '');
 		},
 		name: 'limit',
 		pattern: /^\d*$/,
@@ -98,16 +98,6 @@ module.exports = [
 		pattern: /^(csv|zip|term)$/,
 		message: 'Output type has to be "csv", "zip" or "term"',
 		default: 'csv'
-	},
-	{
-		ask: () => {
-			return (commander.outputType && commander.outputType === 'zip' && !commander.encrypt) || (prompt.history('outputType') && prompt.history('outputType') === 'zip')
-		},
-		name: 'encrypt',
-		description: 'Encrypt?',
-		type: 'boolean',
-		message: 'Encryption flag must be a valid boolean',
-		default: false
 	},
 	{
 		ask: () => {
